@@ -155,6 +155,12 @@ export function WalletProvider({ children }) {
         const added = e.data?.added ?? [];
         const removed = e.data?.removed ?? [];
 
+        const addedTxids = new Set(
+          added
+            .map(u => u.outpoint?.transactionId)
+            .filter(Boolean),
+        );
+
         added.forEach(u => {
           dispatch({
             type: 'ADD_TX',
@@ -167,10 +173,12 @@ export function WalletProvider({ children }) {
           });
         });
         removed.forEach(u => {
+          const txid = u.outpoint?.transactionId;
+          if (txid && addedTxids.has(txid)) return;
           dispatch({
             type: 'ADD_TX',
             tx: {
-              id: 'spent-' + (u.outpoint?.transactionId ?? Math.random().toString()),
+              id: 'spent-' + (txid ?? Math.random().toString()),
               type: 'sent',
               amount: sompiToXenom(u.amount ?? 0n),
               timestamp: Date.now(),
