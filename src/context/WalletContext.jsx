@@ -1,5 +1,5 @@
 import { createContext, useContext, useReducer, useRef, useCallback, useEffect } from 'react';
-import { initSDK, deriveWallet, sompiToXenom, NETWORK_ID } from '../sdk.js';
+import { initSDK, sompiToXenom, NETWORK_ID } from '../sdk.js';
 
 const WalletContext = createContext(null);
 const DEFAULT_NODE_URL = 'wss://wallet.xenom.space/wrpc/';
@@ -57,17 +57,22 @@ export function WalletProvider({ children }) {
   const pollRef = useRef(null);
   const subscribed = useRef(false);
 
-  useEffect(() => {
-    initSDK().then(kaspa => {
+  const ensureSDK = useCallback(async () => {
+    if (kaspaRef.current) return kaspaRef.current;
+    try {
+      const kaspa = await initSDK();
       kaspaRef.current = kaspa;
       dispatch({ type: 'SDK_READY' });
-    }).catch(err => {
+      dispatch({ type: 'CLEAR_ERROR' });
+      return kaspa;
+    } catch (err) {
       dispatch({ type: 'SET_ERROR', error: `Failed to load SDK: ${err.message}. Run: npm run copy-sdk` });
-    });
+      throw err;
+    }
   }, []);
 
   const connect = useCallback(async (_url) => {
-    const kaspa = kaspaRef.current;
+    const kaspa = await ensureSDK();
     if (!kaspa) return;
 
     try {
@@ -205,6 +210,7 @@ export function WalletProvider({ children }) {
   const value = {
     ...state,
     kaspa: kaspaRef.current,
+    ensureSDK,
     connect,
     unlock,
     logout,

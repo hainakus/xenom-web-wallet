@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWallet } from '../context/WalletContext.jsx';
 import { storeWallet } from '../crypto.js';
@@ -8,7 +8,7 @@ import { copyTextToClipboard } from '../clipboard.js';
 const STEPS = { MODE: 0, MNEMONIC: 1, CONFIRM: 2, PASSWORD: 3 };
 
 export default function Setup() {
-  const { kaspa, unlock, connect } = useWallet();
+  const { kaspa, ensureSDK, sdkReady, error: sdkError, unlock, connect } = useWallet();
   const navigate = useNavigate();
   const [step, setStep] = useState(STEPS.MODE);
   const [mode, setMode] = useState(null);
@@ -21,6 +21,24 @@ export default function Setup() {
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!sdkReady) {
+      ensureSDK().catch(() => {});
+    }
+  }, [sdkReady, ensureSDK]);
+
+  if (!sdkReady) {
+    return (
+      <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',padding:'1.5rem',background:'#020408'}} className="grid-bg">
+        <div style={{width:'100%',maxWidth:520,textAlign:'center'}}>
+          <div style={{fontFamily:'Share Tech Mono,monospace',fontSize:'.7rem',color:'#3a5040'}}>
+            {sdkError ? sdkError : 'Loading Xenom SDK…'}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   function startCreate() {
     if (!kaspa) return;

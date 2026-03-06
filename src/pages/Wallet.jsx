@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Routes, Route, NavLink, Navigate, useNavigate } from 'react-router-dom';
 import { useWallet } from '../context/WalletContext.jsx';
 import Dashboard from './Dashboard.jsx';
@@ -32,8 +33,24 @@ function SidebarLink({ to, icon, label }) {
 }
 
 export default function Wallet() {
-  const { address, connected, logout, refreshBalance } = useWallet();
+  const { address, ensureSDK, sdkReady, error: sdkError, connected, logout, refreshBalance } = useWallet();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!sdkReady) {
+      ensureSDK().catch(() => {});
+    }
+  }, [sdkReady, ensureSDK]);
+
+  if (!sdkReady) {
+    return (
+      <div className="flex h-screen overflow-hidden" style={{background:'#020408'}}>
+        <div style={{margin:'auto',fontFamily:'Share Tech Mono,monospace',fontSize:'.7rem',color:'#3a5040'}}>
+          {sdkError ? sdkError : 'Loading Xenom SDK…'}
+        </div>
+      </div>
+    );
+  }
 
   async function handleLogout() {
     await logout();
