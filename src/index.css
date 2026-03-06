@@ -1,0 +1,340 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Explorer-matching base ──────────────────────────── */
+@layer base {
+  html, body, #root { height: 100%; }
+
+  body {
+    background: #020408;
+    color: #7ab090;
+    font-family: 'Rajdhani', system-ui, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* CRT scanline overlay — exact match from explorer */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.04) 2px,
+      rgba(0,0,0,0.04) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: #020408; }
+  ::-webkit-scrollbar-thumb { background: #0f2a1a; }
+  ::-webkit-scrollbar-thumb:hover { background: #1a4028; }
+
+  * { box-sizing: border-box; }
+}
+
+/* ── Component layer ─────────────────────────────────── */
+@layer components {
+
+  /* Grid background — green lines like explorer */
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(0,255,136,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,136,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Panel — sharp corners, dark green tint */
+  .card {
+    background: #060f0a;
+    border: 1px solid #0f2a1a;
+    padding: 1.1rem 1.4rem;
+  }
+
+  /* Stat card — has left green bar accent */
+  .stat-card {
+    background: #060f0a;
+    border: 1px solid #0f2a1a;
+    padding: 1.1rem 1.1rem 1.1rem 1.4rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color .3s, box-shadow .3s;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 2px; height: 100%;
+    background: #00ff88;
+    box-shadow: 0 0 8px #00ff88;
+  }
+  .stat-card:hover {
+    border-color: rgba(0,255,136,.25);
+    box-shadow: 0 0 20px rgba(0,255,136,.12);
+  }
+
+  .stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: .58rem;
+    color: #3a5040;
+    text-transform: uppercase;
+    letter-spacing: .15em;
+    margin-bottom: .45rem;
+  }
+  .stat-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
+    color: #00ff88;
+    font-weight: 700;
+    text-shadow: 0 0 12px rgba(0,255,136,.25);
+    line-height: 1.1;
+  }
+
+  /* Section title (Orbitron, green, uppercase) */
+  .sec-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: .72rem;
+    color: #00ff88;
+    text-transform: uppercase;
+    letter-spacing: .2em;
+    font-weight: 700;
+  }
+
+  /* Page heading */
+  .pg-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: .9rem;
+    color: #00ff88;
+    text-transform: uppercase;
+    letter-spacing: .2em;
+    font-weight: 700;
+  }
+  .pg-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: .65rem;
+    color: #3a5040;
+    margin-top: .3rem;
+  }
+
+  /* Label */
+  .label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: .58rem;
+    color: #3a5040;
+    text-transform: uppercase;
+    letter-spacing: .15em;
+    margin-bottom: .5rem;
+    display: block;
+  }
+
+  /* Section label (sidebar) */
+  .section-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: .55rem;
+    color: #3a5040;
+    text-transform: uppercase;
+    letter-spacing: .2em;
+    padding: 0 .75rem;
+    margin-bottom: .35rem;
+    margin-top: 1.25rem;
+  }
+
+  /* Nav items */
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .4rem .75rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: .68rem;
+    color: #3a5040;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    border: 1px solid transparent;
+    transition: all .2s;
+    cursor: pointer;
+  }
+  .nav-item:hover {
+    color: #00ff88;
+    border-color: #0f2a1a;
+    text-shadow: 0 0 8px rgba(0,255,136,.4);
+  }
+  .nav-item.active {
+    color: #00ff88;
+    border-color: #0f2a1a;
+    background: rgba(0,255,136,.06);
+    text-shadow: 0 0 8px rgba(0,255,136,.4);
+  }
+
+  /* Buttons */
+  .btn-primary {
+    background: #00ff88;
+    color: #020408;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: .72rem;
+    font-weight: 700;
+    padding: .45rem 1rem;
+    border: none;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    cursor: pointer;
+    transition: all .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+  }
+  .btn-primary:hover {
+    background: #00cc6a;
+    box-shadow: 0 0 20px rgba(0,255,136,.4);
+  }
+  .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+
+  .btn-secondary {
+    background: transparent;
+    color: #3a5040;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: .68rem;
+    padding: .4rem .85rem;
+    border: 1px solid #0f2a1a;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    cursor: pointer;
+    transition: all .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+  }
+  .btn-secondary:hover {
+    color: #00ff88;
+    border-color: rgba(0,255,136,.3);
+    text-shadow: 0 0 8px rgba(0,255,136,.3);
+  }
+  .btn-secondary:disabled { opacity: .4; cursor: not-allowed; }
+
+  .btn-ghost {
+    background: transparent;
+    color: #3a5040;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: .65rem;
+    padding: .35rem .65rem;
+    border: 1px solid transparent;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    cursor: pointer;
+    transition: all .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+  }
+  .btn-ghost:hover { color: #00ff88; border-color: #0f2a1a; }
+
+  .btn-danger {
+    background: rgba(255,51,102,.08);
+    color: #ff3366;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: .68rem;
+    padding: .4rem .85rem;
+    border: 1px solid #ff3366;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    cursor: pointer;
+    transition: all .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+  }
+  .btn-danger:hover { background: rgba(255,51,102,.16); }
+
+  /* Input */
+  .input {
+    width: 100%;
+    background: #020408;
+    border: 1px solid #0f2a1a;
+    color: #7ab090;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: .72rem;
+    padding: .5rem .75rem;
+    outline: none;
+    transition: all .2s;
+  }
+  .input:focus {
+    border-color: #00cc6a;
+    box-shadow: 0 0 15px rgba(0,255,136,.12);
+  }
+  .input::placeholder { color: #3a5040; }
+
+  /* Badge styles */
+  .badge-green {
+    display: inline-block;
+    padding: .12rem .38rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: .58rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: #00ff88;
+    border: 1px solid #00cc6a;
+    background: rgba(0,255,136,.08);
+  }
+  .badge-cyan {
+    color: #00e5ff;
+    border: 1px solid #00e5ff;
+    background: rgba(0,229,255,.08);
+    display: inline-block;
+    padding: .12rem .38rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: .58rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+  }
+  .badge-red {
+    color: #ff3366;
+    border: 1px solid #ff3366;
+    background: rgba(255,51,102,.08);
+    display: inline-block;
+    padding: .12rem .38rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: .58rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+  }
+  .badge-yellow {
+    color: #ffcc00;
+    border: 1px solid #ffcc00;
+    background: rgba(255,204,0,.08);
+    display: inline-block;
+    padding: .12rem .38rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: .58rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+  }
+
+  /* Mono text */
+  .mono { font-family: 'Share Tech Mono', monospace; }
+
+  /* Link style */
+  .lnk {
+    color: #00e5ff;
+    font-family: 'Share Tech Mono', monospace;
+    cursor: pointer;
+    transition: color .2s, text-shadow .2s;
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: inherit;
+  }
+  .lnk:hover {
+    color: #00ff88;
+    text-shadow: 0 0 8px rgba(0,255,136,.4);
+  }
+
+  /* Amount colors */
+  .amt-green { color: #00ff88; font-family: 'Share Tech Mono', monospace; }
+  .amt-yellow { color: #ffcc00; font-family: 'Share Tech Mono', monospace; }
+  .amt-red { color: #ff3366; font-family: 'Share Tech Mono', monospace; }
+}
