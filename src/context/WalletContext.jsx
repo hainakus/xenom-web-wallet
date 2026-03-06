@@ -2,6 +2,7 @@ import { createContext, useContext, useReducer, useRef, useCallback, useEffect }
 import { initSDK, deriveWallet, sompiToXenom, NETWORK_ID } from '../sdk.js';
 
 const WalletContext = createContext(null);
+const DEFAULT_NODE_URL = 'wss://wallet.xenom.space/wrpc/';
 
 const initialState = {
   sdkReady: false,
@@ -13,7 +14,6 @@ const initialState = {
   txHistory: [],
   rpc: null,
   connected: false,
-  nodeUrl: '127.0.0.1:27110',
   dagHeight: null,
   networkId: NETWORK_ID,
   error: null,
@@ -31,8 +31,6 @@ function reducer(state, action) {
       return { ...state, connected: action.connected };
     case 'SET_DAG_HEIGHT':
       return { ...state, dagHeight: action.height };
-    case 'SET_NODE_URL':
-      return { ...state, nodeUrl: action.url };
     case 'SET_BALANCE':
       return { ...state, balance: action.balance, pendingBalance: action.pending };
     case 'SET_UTXOS':
@@ -68,7 +66,7 @@ export function WalletProvider({ children }) {
     });
   }, []);
 
-  const connect = useCallback(async (url) => {
+  const connect = useCallback(async (_url) => {
     const kaspa = kaspaRef.current;
     if (!kaspa) return;
 
@@ -76,7 +74,7 @@ export function WalletProvider({ children }) {
       if (state.rpc) {
         try { await state.rpc.disconnect(); } catch {}
       }
-      const targetUrl = url || state.nodeUrl;
+      const targetUrl = DEFAULT_NODE_URL;
       const rpc = new kaspa.RpcClient({
         url: targetUrl,
         encoding: kaspa.Encoding.Borsh,
@@ -86,7 +84,6 @@ export function WalletProvider({ children }) {
       rpc.addEventListener('disconnect', () => dispatch({ type: 'SET_CONNECTED', connected: false }));
       await rpc.connect();
       dispatch({ type: 'SET_RPC', rpc });
-      dispatch({ type: 'SET_NODE_URL', url: targetUrl });
       try {
         const info = await rpc.getServerInfo();
         if (info?.virtualDaaScore) dispatch({ type: 'SET_DAG_HEIGHT', height: info.virtualDaaScore.toString() });
@@ -94,7 +91,7 @@ export function WalletProvider({ children }) {
     } catch (err) {
       dispatch({ type: 'SET_ERROR', error: `Connection failed: ${String(err)}` });
     }
-  }, [state.rpc, state.nodeUrl]);
+  }, [state.rpc]);
 
   const refreshBalance = useCallback(async () => {
     if (!state.rpc || !state.address || !state.connected) return;

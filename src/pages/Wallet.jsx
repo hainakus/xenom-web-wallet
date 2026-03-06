@@ -32,7 +32,7 @@ function SidebarLink({ to, icon, label }) {
 }
 
 export default function Wallet() {
-  const { address, connected, nodeUrl, logout, refreshBalance } = useWallet();
+  const { address, connected, logout, refreshBalance } = useWallet();
   const navigate = useNavigate();
 
   async function handleLogout() {

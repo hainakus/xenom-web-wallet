@@ -18,7 +18,6 @@ export default function Setup() {
   const [confirmIndices, setConfirmIndices] = useState([]);
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [nodeUrl, setNodeUrl] = useState('127.0.0.1:27110');
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -67,7 +66,7 @@ export default function Setup() {
       const { address, privateKeyHex } = deriveWallet(kaspa, phrase);
       await storeWallet(phrase, password);
       unlock(address, privateKeyHex);
-      await connect(nodeUrl);
+      await connect();
       navigate('/wallet/dashboard', { replace: true });
     } catch (e) {
       setError(e.message);
@@ -200,11 +199,6 @@ export default function Setup() {
                   value={importInput} onChange={e => setImportInput(e.target.value)} />
               </div>
             )}
-
-            <div>
-              <label className="label">Node URL</label>
-              <input type="text" className="input" value={nodeUrl} onChange={e => setNodeUrl(e.target.value)} placeholder="127.0.0.1:27110" />
-            </div>
             <div>
               <label className="label">Password (min. 8 chars)</label>
               <input type="password" className="input" value={password} onChange={e => setPassword(e.target.value)} />

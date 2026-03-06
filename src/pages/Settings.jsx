@@ -5,9 +5,8 @@ import { deleteWallet, loadWallet } from '../crypto.js';
 import { DERIVATION_PATH, NETWORK_ID } from '../sdk.js';
 
 export default function Settings() {
-  const { nodeUrl, connect, connected, address, logout } = useWallet();
+  const { connect, connected, address, logout } = useWallet();
   const navigate = useNavigate();
-  const [newUrl, setNewUrl] = useState(nodeUrl);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
   const [showExport, setShowExport] = useState(false);
@@ -20,7 +19,7 @@ export default function Settings() {
     setBusy(true);
     setMsg('');
     try {
-      await connect(newUrl);
+      await connect();
       setMsg('Reconnected successfully');
     } catch (e) {
       setMsg('Failed: ' + e.message);
@@ -64,7 +63,7 @@ export default function Settings() {
         <div style={{display:'flex',flexDirection:'column',gap:'1rem'}}>
           <div>
             <label className="label">Node URL</label>
-            <input type="text" className="input" value={newUrl} onChange={e => setNewUrl(e.target.value)} />
+            <input type="text" className="input" value="wss://wallet.xenom.space/wrpc/" readOnly />
           </div>
           <div style={{display:'flex',alignItems:'center',gap:'1rem',flexWrap:'wrap'}}>
             <button onClick={handleReconnect} disabled={busy} className="btn-primary">
@@ -73,7 +72,7 @@ export default function Settings() {
             <span style={{display:'flex',alignItems:'center',gap:'.4rem'}}>
               <span style={{width:7,height:7,borderRadius:'50%',background:connected?'#00ff88':'#ff3366',boxShadow:connected?'0 0 8px #00ff88':'0 0 8px #ff3366',display:'inline-block'}} />
               <span style={{...mono,fontSize:'.62rem',color:connected?'#00ff88':'#ff3366'}}>
-                {connected ? `Connected — ${nodeUrl}` : 'Disconnected'}
+                {connected ? 'Connected — wss://wallet.xenom.space/wrpc/' : 'Disconnected'}
               </span>
             </span>
           </div>

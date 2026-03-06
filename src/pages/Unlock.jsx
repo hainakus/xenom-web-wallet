@@ -8,7 +8,6 @@ export default function Unlock() {
   const { kaspa, unlock, connect } = useWallet();
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
-  const [nodeUrl, setNodeUrl] = useState('127.0.0.1:27110');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [showReset, setShowReset] = useState(false);
@@ -22,7 +21,7 @@ export default function Unlock() {
       if (!mnemonic) throw new Error('No wallet found');
       const { address, privateKeyHex } = deriveWallet(kaspa, mnemonic);
       unlock(address, privateKeyHex);
-      await connect(nodeUrl);
+      await connect();
       navigate('/wallet/dashboard', { replace: true });
     } catch (e) {
       setError(e.message);
@@ -56,10 +55,6 @@ export default function Unlock() {
         </div>
 
         <form onSubmit={handleUnlock} style={{...panel, display:'flex', flexDirection:'column', gap:'1rem'}}>
-          <div>
-            <label className="label">Node URL</label>
-            <input type="text" className="input" value={nodeUrl} onChange={e => setNodeUrl(e.target.value)} />
-          </div>
           <div>
             <label className="label">Password</label>
             <input type="password" className="input" value={password} autoFocus onChange={e => setPassword(e.target.value)} />
