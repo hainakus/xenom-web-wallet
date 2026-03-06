@@ -161,6 +161,14 @@ export function WalletProvider({ children }) {
             .filter(Boolean),
         );
 
+        const addedAmounts = new Map();
+        added.forEach(u => {
+          const amount = u.amount;
+          if (amount == null) return;
+          const key = amount.toString();
+          addedAmounts.set(key, (addedAmounts.get(key) ?? 0) + 1);
+        });
+
         added.forEach(u => {
           dispatch({
             type: 'ADD_TX',
@@ -175,6 +183,17 @@ export function WalletProvider({ children }) {
         removed.forEach(u => {
           const txid = u.outpoint?.transactionId;
           if (txid && addedTxids.has(txid)) return;
+
+          const amount = u.amount;
+          if (amount != null) {
+            const key = amount.toString();
+            const count = addedAmounts.get(key) ?? 0;
+            if (count > 0) {
+              addedAmounts.set(key, count - 1);
+              return;
+            }
+          }
+
           dispatch({
             type: 'ADD_TX',
             tx: {
