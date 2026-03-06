@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useWallet } from '../context/WalletContext.jsx';
+import { copyTextToClipboard } from '../clipboard.js';
 
 export default function Receive() {
   const { address } = useWallet();
   const [copied, setCopied] = useState(false);
 
-  function copy() {
-    navigator.clipboard.writeText(address);
+  async function copy() {
+    const ok = await copyTextToClipboard(address);
+    if (!ok) return;
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }

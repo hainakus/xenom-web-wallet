@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useWallet } from '../context/WalletContext.jsx';
 import { storeWallet } from '../crypto.js';
 import { deriveWallet } from '../sdk.js';
+import { copyTextToClipboard } from '../clipboard.js';
 
 const STEPS = { MODE: 0, MNEMONIC: 1, CONFIRM: 2, PASSWORD: 3 };
 
@@ -75,8 +76,12 @@ export default function Setup() {
     }
   }
 
-  function copyMnemonic() {
-    navigator.clipboard.writeText(mnemonic);
+  async function copyMnemonic() {
+    const ok = await copyTextToClipboard(mnemonic);
+    if (!ok) {
+      setError('Copy failed: your browser may block clipboard access on this connection');
+      return;
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
