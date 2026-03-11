@@ -5,6 +5,9 @@ import Dashboard from './Dashboard.jsx';
 import Send from './Send.jsx';
 import Receive from './Receive.jsx';
 import History from './History.jsx';
+import TxDetail from './TxDetail.jsx';
+import BlockDetail from './BlockDetail.jsx';
+import WalletDetail from './WalletDetail.jsx';
 import Settings from './Settings.jsx';
 
 const NAV = [
@@ -133,6 +136,9 @@ export default function Wallet() {
               <Route path="send"      element={<Send />} />
               <Route path="receive"   element={<Receive />} />
               <Route path="history"   element={<History />} />
+              <Route path="txs/:txid" element={<TxDetail />} />
+              <Route path="blocks/:daa_score" element={<BlockDetail />} />
+              <Route path="wallets/:wallet" element={<WalletDetail />} />
               <Route path="settings"  element={<Settings />} />
               <Route path="*"         element={<Navigate to="dashboard" replace />} />
             </Routes>

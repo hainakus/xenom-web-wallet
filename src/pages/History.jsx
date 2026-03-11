@@ -1,8 +1,13 @@
 import { useWallet } from '../context/WalletContext.jsx';
+import { Link } from 'react-router-dom';
 
 const mono = {fontFamily:'Share Tech Mono,monospace'};
 const tblTd = {padding:'.6rem .85rem',borderBottom:'1px solid rgba(15,42,26,.5)',...mono,fontSize:'.68rem',verticalAlign:'middle'};
 const tblTh = {textAlign:'left',padding:'.55rem .85rem',color:'#3a5040',textTransform:'uppercase',letterSpacing:'.08em',borderBottom:'1px solid #0f2a1a',fontSize:'.58rem',fontWeight:400,...mono};
+
+function normalizeTxId(txid = '') {
+  return txid.replace(/^spent-/, '').replace(/^consolidate-/, '');
+}
 
 export default function History() {
   const { txHistory, utxos } = useWallet();
@@ -45,7 +50,11 @@ export default function History() {
                     onMouseEnter={e=>e.currentTarget.style.background='#0d1f15'}
                     onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
                     <td style={tblTd}><span style={{color}}>{isSent?'↑':'↓'} {tx.type}</span></td>
-                    <td style={{...tblTd,color:'#3a5040'}}>{tx.id.replace('spent-','').slice(0,24)}…</td>
+                    <td style={{...tblTd,color:'#3a5040'}}>
+                      <Link to={`/wallet/txs/${normalizeTxId(tx.id)}`} style={{color:'#7ab090',textDecoration:'none'}}>
+                        {normalizeTxId(tx.id).slice(0,24)}…
+                      </Link>
+                    </td>
                     <td style={{...tblTd,textAlign:'right',color}}>{isSent?'−':'+'}{tx.amount}</td>
                     <td style={{...tblTd,textAlign:'right',color:'#3a5040',borderBottom:'none'}}>{date}</td>
                   </tr>

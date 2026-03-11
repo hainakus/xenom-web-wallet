@@ -6,12 +6,16 @@ export async function initSDK() {
   if (_initPromise) return _initPromise;
 
   _initPromise = (async () => {
-    // Use a computed URL — Vite 5 blocks static string imports from public/
-    const sdkUrl = `${location.origin}/sdk/kaspa.js`;
-    const kaspa = await import(/* @vite-ignore */ sdkUrl);
-    await kaspa.default('/sdk/kaspa_bg.wasm');
-    _sdk = kaspa;
-    return kaspa;
+    try {
+      const sdkUrl = `${location.origin}/sdk/kaspa.js`;
+      const kaspa = await import(/* @vite-ignore */ sdkUrl);
+      await kaspa.default();
+      _sdk = kaspa;
+      return kaspa;
+    } catch (error) {
+      _initPromise = null;
+      throw error;
+    }
   })();
 
   return _initPromise;
@@ -48,6 +52,33 @@ export function deriveWallet(kaspa, mnemonic) {
   const address = privateKey.toPublicKey().toAddress(NETWORK_ID).toString();
   const privateKeyHex = privateKey.toString();
   return { address, privateKeyHex };
+}
+
+export async function consolidateUtxos(kaspa, rpc, privateKeyHex, address, sourceEntries) {
+  try {
+    const privateKey = new kaspa.PrivateKey(privateKeyHex);
+    const entries = sourceEntries ?? (await rpc.getUtxosByAddresses([address])).entries;
+    if (!entries || entries.length < 2) return { txids: [], fees: 0n };
+
+    const { transactions, summary } = await kaspa.createTransactions({
+      entries,
+      changeAddress: address,
+      priorityFee: { amount: 0n, source: kaspa.FeeSource.SenderPays },
+      networkId: NETWORK_ID,
+    });
+
+    const txids = [];
+    for (const pendingTx of transactions) {
+      pendingTx.sign([privateKey]);
+      const txid = await pendingTx.submit(rpc);
+      txids.push(txid);
+    }
+
+    return { txids, fees: summary?.fees ?? 0n };
+  } catch (e) {
+    console.error('[consolidateUtxos error]', e);
+    throw new Error(String(e));
+  }
 }
 
 export async function sendXenom(kaspa, rpc, privateKeyHex, fromAddr, toAddr, amountXenom, feeSompi = 0n) {

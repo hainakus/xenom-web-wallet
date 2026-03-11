@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { WalletProvider, useWallet } from './context/WalletContext.jsx';
 import { hasStoredWallet } from './crypto.js';
 import Setup from './pages/Setup.jsx';
@@ -49,12 +49,36 @@ function Router() {
         } />
         <Route path="/setup" element={<Setup />} />
         <Route path="/unlock" element={<Unlock />} />
+        <Route path="/txs/:txid" element={
+          address ? <TxRedirect /> : <Navigate to="/unlock" replace />
+        } />
+        <Route path="/blocks/:daa_score" element={
+          address ? <BlockRedirect /> : <Navigate to="/unlock" replace />
+        } />
+        <Route path="/wallets/:wallet" element={
+          address ? <WalletRedirect /> : <Navigate to="/unlock" replace />
+        } />
         <Route path="/wallet/*" element={
           address ? <Wallet /> : <Navigate to="/" replace />
         } />
       </Routes>
     </BrowserRouter>
   );
+}
+
+function TxRedirect() {
+  const { txid = '' } = useParams();
+  return <Navigate to={`/wallet/txs/${txid}`} replace />;
+}
+
+function BlockRedirect() {
+  const { daa_score = '' } = useParams();
+  return <Navigate to={`/wallet/blocks/${daa_score}`} replace />;
+}
+
+function WalletRedirect() {
+  const { wallet = '' } = useParams();
+  return <Navigate to={`/wallet/wallets/${wallet}`} replace />;
 }
 
 export default function App() {

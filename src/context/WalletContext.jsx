@@ -1,8 +1,9 @@
 import { createContext, useContext, useReducer, useRef, useCallback, useEffect } from 'react';
-import { initSDK, sompiToXenom, NETWORK_ID } from '../sdk.js';
+import { initSDK, sompiToXenom, NETWORK_ID, consolidateUtxos } from '../sdk.js';
 
 const WalletContext = createContext(null);
 const DEFAULT_NODE_URL = 'wss://wallet.xenom.space/wrpc/';
+const AUTO_CONSOLIDATE_UTXO_THRESHOLD = 5000;
 
 const initialState = {
   sdkReady: false,
@@ -56,6 +57,9 @@ export function WalletProvider({ children }) {
   const kaspaRef = useRef(null);
   const pollRef = useRef(null);
   const subscribed = useRef(false);
+  const consolidatingRef = useRef(false);
+  const lastConsolidatedUtxoCountRef = useRef(0);
+  const refreshBalanceRef = useRef(() => {});
 
   const ensureSDK = useCallback(async () => {
     if (kaspaRef.current) return kaspaRef.current;
@@ -98,6 +102,41 @@ export function WalletProvider({ children }) {
     }
   }, [state.rpc]);
 
+  const autoConsolidate = useCallback(async (entries) => {
+    if (!state.rpc || !state.address || !state.privateKeyHex || !state.connected) return;
+    if (!entries || entries.length <= AUTO_CONSOLIDATE_UTXO_THRESHOLD) return;
+    if (consolidatingRef.current) return;
+    if (lastConsolidatedUtxoCountRef.current === entries.length) return;
+
+    consolidatingRef.current = true;
+    lastConsolidatedUtxoCountRef.current = entries.length;
+
+    try {
+      const kaspa = await ensureSDK();
+      const { txids } = await consolidateUtxos(kaspa, state.rpc, state.privateKeyHex, state.address, entries);
+      txids.forEach(id => {
+        dispatch({
+          type: 'ADD_TX',
+          tx: {
+            id: `consolidate-${id}`,
+            type: 'sent',
+            amount: '0',
+            timestamp: Date.now(),
+          },
+        });
+      });
+      dispatch({ type: 'CLEAR_ERROR' });
+      setTimeout(() => {
+        void refreshBalanceRef.current();
+      }, 2000);
+    } catch (err) {
+      lastConsolidatedUtxoCountRef.current = 0;
+      dispatch({ type: 'SET_ERROR', error: `Auto consolidation failed: ${String(err)}` });
+    } finally {
+      consolidatingRef.current = false;
+    }
+  }, [state.rpc, state.address, state.privateKeyHex, state.connected, ensureSDK]);
+
   const refreshBalance = useCallback(async () => {
     if (!state.rpc || !state.address || !state.connected) return;
     try {
@@ -109,8 +148,11 @@ export function WalletProvider({ children }) {
       });
       const { entries } = await state.rpc.getUtxosByAddresses([state.address]);
       dispatch({ type: 'SET_UTXOS', utxos: entries ?? [] });
+      void autoConsolidate(entries ?? []);
     } catch {}
-  }, [state.rpc, state.address, state.connected]);
+  }, [state.rpc, state.address, state.connected, autoConsolidate]);
+
+  refreshBalanceRef.current = refreshBalance;
 
   const fetchInitialHistory = useCallback(async () => {
     if (!state.rpc || !state.address || !state.connected) return;
@@ -222,12 +264,16 @@ export function WalletProvider({ children }) {
 
   const unlock = useCallback((address, privateKeyHex) => {
     subscribed.current = false;
+    consolidatingRef.current = false;
+    lastConsolidatedUtxoCountRef.current = 0;
     dispatch({ type: 'SET_WALLET', address, privateKeyHex });
   }, []);
 
   const logout = useCallback(async () => {
     clearInterval(pollRef.current);
     subscribed.current = false;
+    consolidatingRef.current = false;
+    lastConsolidatedUtxoCountRef.current = 0;
     if (state.rpc) {
       try { await state.rpc.disconnect(); } catch {}
     }

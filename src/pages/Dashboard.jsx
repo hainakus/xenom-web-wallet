@@ -9,6 +9,10 @@ const S = {
   tblTd: { padding:'.6rem .85rem', borderBottom:'1px solid rgba(15,42,26,.5)', fontFamily:'Share Tech Mono,monospace', fontSize:'.68rem', verticalAlign:'middle' },
 };
 
+function normalizeTxId(txid = '') {
+  return txid.replace(/^spent-/, '').replace(/^consolidate-/, '');
+}
+
 export default function Dashboard() {
   const { balance, pendingBalance, utxos, txHistory, dagHeight, networkId } = useWallet();
   const navigate = useNavigate();
@@ -118,7 +122,12 @@ export default function Dashboard() {
                     </span>
                   </td>
                   <td style={{...S.tblTd,color:'#3a5040'}}>
-                    {tx.id.replace('spent-','').slice(0,22)}…
+                    <button
+                      onClick={() => navigate(`/wallet/txs/${normalizeTxId(tx.id)}`)}
+                      style={{background:'none',border:'none',padding:0,color:'#7ab090',cursor:'pointer',font:'inherit'}}
+                    >
+                      {normalizeTxId(tx.id).slice(0,22)}…
+                    </button>
                   </td>
                   <td style={{...S.tblTd,textAlign:'right',color:tx.type==='sent'?'#ff3366':'#00ff88'}}>
                     {tx.type==='sent'?'−':'+'}{tx.amount}
