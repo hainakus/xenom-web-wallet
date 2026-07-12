@@ -40,23 +40,23 @@ export default function Send() {
     setAmount(balance);
   }
 
-  const P = {background:'#060f0a',border:'1px solid #0f2a1a',padding:'1.4rem'};
+  const P = {background:'var(--panel)',border:'1px solid var(--border)',padding:'1.4rem',backdropFilter:'blur(20px)',boxShadow:'var(--shadow)',borderRadius:'24px'};
   const mono = {fontFamily:'Share Tech Mono,monospace'};
 
   return (
     <div style={{maxWidth:580}}>
-      <div style={{marginBottom:'1.75rem',paddingBottom:'1rem',borderBottom:'1px solid #0f2a1a'}}>
+      <div style={{marginBottom:'1.75rem',paddingBottom:'1rem',borderBottom:'1px solid var(--border)'}}>
         <div className="pg-title">Send XENOM</div>
         <div className="pg-sub">Transfer to another address</div>
       </div>
 
       {result && (
-        <div style={{...P,borderColor:'rgba(0,255,136,.3)',marginBottom:'1.25rem',display:'flex',flexDirection:'column',gap:'.5rem'}}>
-          <div style={{...mono,fontSize:'.7rem',color:'#00ff88'}}>✓ Transaction submitted</div>
+        <div style={{...P,borderColor:'rgba(127,224,196,.34)',marginBottom:'1.25rem',display:'flex',flexDirection:'column',gap:'.5rem'}}>
+          <div style={{...mono,fontSize:'.7rem',color:'var(--success)'}}>✓ Transaction submitted</div>
           {result.txids.map(id => (
-            <div key={id} style={{...mono,fontSize:'.62rem',color:'#3a5040',wordBreak:'break-all'}}>{id}</div>
+            <div key={id} style={{...mono,fontSize:'.62rem',color:'var(--muted-soft)',wordBreak:'break-all'}}>{id}</div>
           ))}
-          <div style={{...mono,fontSize:'.62rem',color:'#3a5040'}}>Fees paid: {result.fees?.toString()} sompi</div>
+          <div style={{...mono,fontSize:'.62rem',color:'var(--muted-soft)'}}>Fees paid: {result.fees?.toString()} sompi</div>
           <button onClick={() => setResult(null)} className="btn-ghost" style={{alignSelf:'flex-start',padding:'.2rem .5rem'}}>Dismiss</button>
         </div>
       )}
@@ -71,9 +71,9 @@ export default function Send() {
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'.5rem'}}>
             <span className="label" style={{marginBottom:0}}>Amount (XENOM)</span>
             <button type="button" onClick={setMax}
-              style={{...mono,fontSize:'.6rem',color:'#3a5040',background:'none',border:'none',cursor:'pointer',transition:'color .2s'}}
-              onMouseEnter={e=>e.target.style.color='#00ff88'}
-              onMouseLeave={e=>e.target.style.color='#3a5040'}>
+              style={{...mono,fontSize:'.6rem',color:'var(--muted-soft)',background:'none',border:'none',cursor:'pointer',transition:'color .2s'}}
+              onMouseEnter={e=>e.target.style.color='var(--accent)'}
+              onMouseLeave={e=>e.target.style.color='var(--muted-soft)'}>
               Max: {balance}
             </button>
           </div>
@@ -86,7 +86,7 @@ export default function Send() {
         </div>
 
         {error && (
-          <div style={{...mono,fontSize:'.65rem',color:'#ff3366',border:'1px solid rgba(255,51,102,.3)',padding:'.4rem .65rem',background:'rgba(255,51,102,.05)'}}>
+          <div style={{...mono,fontSize:'.65rem',color:'var(--danger)',border:'1px solid rgba(255,127,157,.3)',padding:'.4rem .65rem',background:'rgba(255,127,157,.08)'}}>
             ⚠ {error}
           </div>
         )}
@@ -98,7 +98,7 @@ export default function Send() {
 
       <div style={{...P,marginTop:'1rem'}}>
         <div className="label">Sending from</div>
-        <div style={{...mono,fontSize:'.65rem',color:'#3a5040',wordBreak:'break-all'}}>{address}</div>
+        <div style={{...mono,fontSize:'.65rem',color:'var(--muted-soft)',wordBreak:'break-all'}}>{address}</div>
       </div>
     </div>
   );

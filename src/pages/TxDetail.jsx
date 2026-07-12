@@ -5,10 +5,10 @@ import { sompiToXenom } from '../sdk.js';
 
 const mono = { fontFamily: 'Share Tech Mono,monospace' };
 const page = { display: 'flex', flexDirection: 'column', gap: '1rem', minHeight: 'calc(100vh - 8.5rem)' };
-const panel = { background: '#060f0a', border: '1px solid #0f2a1a', overflow: 'hidden' };
-const row = { display: 'flex', justifyContent: 'space-between', gap: '1rem', padding: '.8rem 1rem', borderBottom: '1px solid rgba(15,42,26,.5)' };
-const keyStyle = { ...mono, fontSize: '.6rem', color: '#3a5040', textTransform: 'uppercase', letterSpacing: '.08em' };
-const valueStyle = { ...mono, fontSize: '.68rem', color: '#d7e6de', textAlign: 'right', wordBreak: 'break-all' };
+const panel = { background: 'var(--panel)', border: '1px solid var(--border)', overflow: 'hidden', backdropFilter: 'blur(20px)', boxShadow: 'var(--shadow)', borderRadius: '24px' };
+const row = { display: 'flex', justifyContent: 'space-between', gap: '1rem', padding: '.8rem 1rem', borderBottom: '1px solid rgba(143,212,229,.10)' };
+const keyStyle = { ...mono, fontSize: '.6rem', color: 'var(--muted-soft)', textTransform: 'uppercase', letterSpacing: '.08em' };
+const valueStyle = { ...mono, fontSize: '.68rem', color: 'var(--text)', textAlign: 'right', wordBreak: 'break-all' };
 
 function normalizeTxId(txid = '') {
   return txid.replace(/^spent-/, '').replace(/^consolidate-/, '');
@@ -122,10 +122,10 @@ export default function TxDetail() {
     : utxoData    ? 'utxo index'
     : 'unavailable';
 
-  const statusColor = type === 'sent' ? '#ff3366'
-    : type === 'received' || isConfirmed ? '#00ff88'
-    : type === 'pending' ? '#ffcc00'
-    : '#3a5040';
+  const statusColor = type === 'sent' ? 'var(--danger)'
+    : type === 'received' || isConfirmed ? 'var(--success)'
+    : type === 'pending' ? 'var(--warning)'
+    : 'var(--muted-soft)';
 
   const requestState = loading ? 'loading'
     : error ? 'error'
@@ -136,7 +136,7 @@ export default function TxDetail() {
 
   return (
     <div style={page}>
-      <div style={{ paddingBottom: '1rem', borderBottom: '1px solid #0f2a1a', display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'center' }}>
+      <div style={{ paddingBottom: '1rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'center' }}>
         <div>
           <div className="pg-title">Transaction Detail</div>
           <div className="pg-sub">Inspect transaction by hash</div>
@@ -179,8 +179,8 @@ export default function TxDetail() {
         </div>
 
         <div style={{ ...panel, minHeight: '100%' }}>
-          <div style={{ padding: '1rem', borderBottom: '1px solid rgba(15,42,26,.5)' }}>
-            <div style={{ ...mono, fontSize: '.65rem', color: '#7ab090', textTransform: 'uppercase', letterSpacing: '.08em' }}>Lookup</div>
+          <div style={{ padding: '1rem', borderBottom: '1px solid rgba(143,212,229,.10)' }}>
+            <div style={{ ...mono, fontSize: '.65rem', color: 'var(--text)', textTransform: 'uppercase', letterSpacing: '.08em' }}>Lookup</div>
           </div>
           <div style={row}>
             <span style={keyStyle}>Source</span>
@@ -196,13 +196,13 @@ export default function TxDetail() {
           </div>
           <div style={row}>
             <span style={keyStyle}>UTXO Match</span>
-            <span style={{ ...valueStyle, color: utxoData ? '#00ff88' : '#3a5040' }}>
+            <span style={{ ...valueStyle, color: utxoData ? 'var(--success)' : 'var(--muted-soft)' }}>
               {utxoData ? `yes (${utxoData.outputCount} output${utxoData.outputCount !== 1 ? 's' : ''})` : 'no'}
             </span>
           </div>
           <div style={{ ...row, borderBottom: 'none' }}>
             <span style={keyStyle}>Request State</span>
-            <span style={{ ...valueStyle, color: loading ? '#ffcc00' : error ? '#ff3366' : '#7ab090' }}>
+            <span style={{ ...valueStyle, color: loading ? 'var(--warning)' : error ? 'var(--danger)' : 'var(--text)' }}>
               {requestState}
             </span>
           </div>
@@ -211,8 +211,8 @@ export default function TxDetail() {
 
       {(loading || (error && !hasData)) && (
         <div style={{ ...panel, padding: '1rem 1.2rem' }}>
-          {loading && <div style={{ ...mono, fontSize: '.64rem', color: '#3a5040' }}>Looking up transaction…</div>}
-          {!loading && error && <div style={{ ...mono, fontSize: '.64rem', color: '#ff3366' }}>{error}</div>}
+          {loading && <div style={{ ...mono, fontSize: '.64rem', color: 'var(--muted-soft)' }}>Looking up transaction…</div>}
+          {!loading && error && <div style={{ ...mono, fontSize: '.64rem', color: 'var(--danger)' }}>{error}</div>}
         </div>
       )}
     </div>

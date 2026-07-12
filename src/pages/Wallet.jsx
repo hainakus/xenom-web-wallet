@@ -47,8 +47,8 @@ export default function Wallet() {
 
   if (!sdkReady) {
     return (
-      <div className="flex h-screen overflow-hidden" style={{background:'#020408'}}>
-        <div style={{margin:'auto',fontFamily:'Share Tech Mono,monospace',fontSize:'.7rem',color:'#3a5040'}}>
+      <div className="flex h-screen overflow-hidden grid-bg" style={{background:'var(--bg)'}}>
+        <div style={{margin:'auto',fontFamily:'Share Tech Mono,monospace',fontSize:'.7rem',color:'var(--muted-soft)'}}>
           {sdkError ? sdkError : 'Loading Xenom SDK…'}
         </div>
       </div>
@@ -65,17 +65,17 @@ export default function Wallet() {
     : '';
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{background:'#020408'}}>
+    <div className="flex h-screen overflow-hidden grid-bg" style={{background:'var(--bg)'}}>
 
       {/* ── Sidebar ─────────────────────────────────────── */}
-      <aside className="w-52 shrink-0 border-r border-border flex flex-col" style={{background:'#060f0a'}}>
+      <aside className="w-52 shrink-0 border-r border-border flex flex-col glass-panel" style={{background:'var(--panel-strong)',borderRadius:'0 24px 24px 0'}}>
 
         {/* Logo */}
         <div className="px-4 py-[14px] border-b border-border">
-          <span style={{fontFamily:'Orbitron,sans-serif',fontSize:'.95rem',fontWeight:900,letterSpacing:'.2em',color:'#00ff88',textShadow:'0 0 20px rgba(0,255,136,0.4)'}}>
+          <span style={{fontFamily:'Orbitron,sans-serif',fontSize:'.95rem',fontWeight:900,letterSpacing:'.2em',color:'var(--accent)',textShadow:'0 0 20px rgba(126,232,255,0.35)'}}>
             ⬡ XENOM
           </span>
-          <span style={{fontFamily:'Orbitron,sans-serif',fontSize:'.95rem',fontWeight:400,letterSpacing:'.15em',color:'#3a5040',marginLeft:'.4rem'}}>
+          <span style={{fontFamily:'Orbitron,sans-serif',fontSize:'.95rem',fontWeight:400,letterSpacing:'.15em',color:'var(--muted-soft)',marginLeft:'.4rem'}}>
             WALLET
           </span>
         </div>
@@ -96,10 +96,10 @@ export default function Wallet() {
         {/* Active address + lock */}
         <div className="px-3 py-3 border-t border-border space-y-2">
           <div className="section-label" style={{paddingLeft:0,marginTop:0}}>Active Address</div>
-          <div style={{fontFamily:'Share Tech Mono,monospace',fontSize:'.6rem',color:'#3a5040',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{shortAddr}</div>
+          <div style={{fontFamily:'Share Tech Mono,monospace',fontSize:'.6rem',color:'var(--muted-soft)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{shortAddr}</div>
           <button
             onClick={handleLogout}
-            className="btn-ghost w-full justify-start text-text-secondary hover:text-status-error text-xs"
+            className="btn-ghost w-full justify-start text-xs"
           >
             <LockIcon /> Lock wallet
           </button>
@@ -110,20 +110,20 @@ export default function Wallet() {
       <div className="flex-1 flex flex-col min-w-0">
 
         {/* Top bar */}
-        <header className="h-10 shrink-0 border-b border-border flex items-center justify-between px-5" style={{background:'#060f0a'}}>
+        <header className="h-10 shrink-0 border-b border-border flex items-center justify-between px-5 glass-surface" style={{background:'var(--panel-strong)',borderRadius:'0 0 24px 24px'}}>
           <div /> {/* spacer */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
-              <span style={{width:7,height:7,borderRadius:'50%',background:connected?'#00ff88':'#ff3366',boxShadow:connected?'0 0 8px #00ff88':'0 0 8px #ff3366',display:'inline-block',flexShrink:0}} />
-              <span style={{fontFamily:'Share Tech Mono,monospace',fontSize:'.62rem',color:connected?'#00ff88':'#ff3366',letterSpacing:'.08em'}}>
+              <span style={{width:7,height:7,borderRadius:'50%',background:connected?'var(--success)':'var(--danger)',boxShadow:connected?'0 0 8px rgba(127,224,196,.8)':'0 0 8px rgba(255,127,157,.8)',display:'inline-block',flexShrink:0}} />
+              <span style={{fontFamily:'Share Tech Mono,monospace',fontSize:'.62rem',color:connected?'var(--success)':'var(--danger)',letterSpacing:'.08em'}}>
                 {connected ? 'Connected' : 'Disconnected'}
               </span>
             </div>
             <div className="flex items-center gap-1">
-              <button onClick={refreshBalance} style={{width:28,height:28,display:'flex',alignItems:'center',justifyContent:'center',background:'none',border:'none',color:'#3a5040',cursor:'pointer',fontFamily:'Share Tech Mono,monospace',fontSize:'.8rem'}} title="Refresh">⟳</button>
-              <span style={{width:28,height:28,display:'flex',alignItems:'center',justifyContent:'center',color:'#3a5040',fontFamily:'Share Tech Mono,monospace',fontSize:'.75rem',cursor:'default'}}>−</span>
-              <span style={{width:28,height:28,display:'flex',alignItems:'center',justifyContent:'center',color:'#3a5040',fontFamily:'Share Tech Mono,monospace',fontSize:'.7rem',cursor:'default'}}>□</span>
-              <button onClick={handleLogout} style={{width:28,height:28,display:'flex',alignItems:'center',justifyContent:'center',background:'none',border:'none',color:'#3a5040',cursor:'pointer',fontFamily:'Share Tech Mono,monospace',fontSize:'.75rem'}} title="Close">✕</button>
+              <button onClick={refreshBalance} style={{width:28,height:28,display:'flex',alignItems:'center',justifyContent:'center',background:'none',border:'none',color:'var(--muted-soft)',cursor:'pointer',fontFamily:'Share Tech Mono,monospace',fontSize:'.8rem'}} title="Refresh">⟳</button>
+              <span style={{width:28,height:28,display:'flex',alignItems:'center',justifyContent:'center',color:'var(--muted-soft)',fontFamily:'Share Tech Mono,monospace',fontSize:'.75rem',cursor:'default'}}>−</span>
+              <span style={{width:28,height:28,display:'flex',alignItems:'center',justifyContent:'center',color:'var(--muted-soft)',fontFamily:'Share Tech Mono,monospace',fontSize:'.7rem',cursor:'default'}}>□</span>
+              <button onClick={handleLogout} style={{width:28,height:28,display:'flex',alignItems:'center',justifyContent:'center',background:'none',border:'none',color:'var(--muted-soft)',cursor:'pointer',fontFamily:'Share Tech Mono,monospace',fontSize:'.75rem'}} title="Close">✕</button>
             </div>
           </div>
         </header>

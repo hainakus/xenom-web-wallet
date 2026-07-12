@@ -28,6 +28,7 @@ export function getSDK() {
 export const NETWORK_ID = 'mainnet';
 export const DERIVATION_PATH = "m/44'/111111'/0'/0/0";
 export const SOMPI_PER_XENOM = 100_000_000n;
+export const CONSOLIDATION_BATCH_SIZE = 80;
 
 export function sompiToXenom(sompi) {
   const s = BigInt(sompi);
@@ -54,16 +55,38 @@ export function deriveWallet(kaspa, mnemonic) {
   return { address, privateKeyHex };
 }
 
-export async function consolidateUtxos(kaspa, rpc, privateKeyHex, address, sourceEntries) {
+function chunkConsolidationEntries(entries, batchSize = CONSOLIDATION_BATCH_SIZE) {
+  const chunks = [];
+  let index = 0;
+
+  while (index < entries.length) {
+    const remaining = entries.length - index;
+    let size = Math.min(batchSize, remaining);
+
+    if (remaining > batchSize && remaining - size === 1) {
+      size -= 1;
+    }
+
+    if (size < 2) {
+      if (chunks.length === 0) return [entries];
+      chunks[chunks.length - 1].push(...entries.slice(index));
+      break;
+    }
+
+    chunks.push(entries.slice(index, index + size));
+    index += size;
+  }
+
+  return chunks;
+}
+
+async function submitConsolidationBatch(kaspa, rpc, privateKeyHex, address, entries) {
   try {
     const privateKey = new kaspa.PrivateKey(privateKeyHex);
-    const entries = sourceEntries ?? (await rpc.getUtxosByAddresses([address])).entries;
-    if (!entries || entries.length < 2) return { txids: [], fees: 0n };
 
     const { transactions, summary } = await kaspa.createTransactions({
       entries,
       changeAddress: address,
-      priorityFee: { amount: 0n, source: kaspa.FeeSource.SenderPays },
       networkId: NETWORK_ID,
     });
 
@@ -75,6 +98,34 @@ export async function consolidateUtxos(kaspa, rpc, privateKeyHex, address, sourc
     }
 
     return { txids, fees: summary?.fees ?? 0n };
+  } catch (e) {
+    console.error('[submitConsolidationBatch error]', e);
+    throw new Error(String(e));
+  }
+}
+
+export async function consolidateUtxos(kaspa, rpc, privateKeyHex, address, sourceEntries, batchSize = CONSOLIDATION_BATCH_SIZE) {
+  try {
+    const entries = sourceEntries ?? (await rpc.getUtxosByAddresses([address])).entries;
+    if (!entries || entries.length < 2) return { txids: [], fees: 0n, batches: 0, consolidated: 0 };
+
+    const txids = [];
+    let fees = 0n;
+    const batches = chunkConsolidationEntries(entries, batchSize);
+
+    for (const batch of batches) {
+      if (batch.length < 2) continue;
+      const result = await submitConsolidationBatch(kaspa, rpc, privateKeyHex, address, batch);
+      txids.push(...result.txids);
+      fees += BigInt(result.fees ?? 0n);
+    }
+
+    return {
+      txids,
+      fees,
+      batches: batches.filter(batch => batch.length >= 2).length,
+      consolidated: entries.length,
+    };
   } catch (e) {
     console.error('[consolidateUtxos error]', e);
     throw new Error(String(e));
